@@ -265,7 +265,7 @@ class Deployer(object):
               logger.error("Log file " + f + " does not exist on " + hostname)
               pass
           else:
-            copy_dir(ftp, f, directory, unique_id, pattern)
+            copy_dir(ftp, f, directory, prefix, pattern)
         if install_path is not None:
           copy_dir(ftp, install_path, directory, prefix, pattern)
 
