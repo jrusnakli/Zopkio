@@ -142,6 +142,14 @@ class TestRunner(object):
     self.directory_info = None
     self.reporter = None
 
+  def get_output_dir(self):
+    return self._output_dir
+
+  def get_logs_dir(self):
+    return self._logs_dir
+
+  def set_logs_dir(self, path):
+    self._logs_dir = path
 
   def success_count(self):
     return self._success_count
@@ -243,11 +251,7 @@ class TestRunner(object):
     """
     Copy logs from remote machines to local destination
     """
-    if "LOGS_DIRECTORY" in self.master_config.mapping:
-      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
-    else:
-      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
-    utils.makedirs(logs_dir)
+
     for deployer in runtime.get_deployers():
       for process in deployer.get_processes():
         logs = self.dynamic_config_module.process_logs( process.servicename) or []
@@ -264,20 +268,12 @@ class TestRunner(object):
     :param naarad_obj:
     :return:
     """
-    if "LOGS_DIRECTORY" in self.master_config.mapping:
-      logs_dir = self.master_config.mapping.get("LOGS_DIRECTORY")
-    else:
-      logs_dir = self.dynamic_config_module.LOGS_DIRECTORY
-    if "OUTPUT_DIRECTORY" in self.master_config.mapping:
-      output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
-    else:
-      output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
-    naarad_obj.analyze(logs_dir, output_dir)
+    naarad_obj.analyze(self._logs_dir, self._output_dir)
 
     if ('matplotlib' in [tuple_[1] for tuple_ in iter_modules()]) and len(self.configs) > 1:
       prevConfig = self.configs[0]
       if naarad_obj._output_directory is None:
-        naarad_obj._output_directory = output_dir
+        naarad_obj._output_directory = self._output_dir
       for curConfig in self.configs[1:]:
         if not curConfig.naarad_id is None:
           naarad_obj.diff(curConfig.naarad_id, prevConfig.naarad_id)
@@ -532,7 +528,6 @@ class TestRunner(object):
         if (test.total_number_iterations > 1):
           test.iteration_results[test.current_iteration] = constants.FAILED
 
-
   def compute_total_iterations_per_test(self):
     """
     Factor in loop_all_tests config into iteration count of each test
@@ -567,12 +562,8 @@ class TestRunner(object):
 
     :return:
     """
-    if "OUTPUT_DIRECTORY" in self.master_config.mapping:
-      output_dir = self.master_config.mapping.get("OUTPUT_DIRECTORY")
-    else:
-      output_dir = self.dynamic_config_module.OUTPUT_DIRECTORY
     reporter = Reporter(self.directory_info["report_name"], self.directory_info["results_dir"],
-                        self.directory_info["logs_dir"], output_dir)
+                        self.directory_info["logs_dir"], self._output_dir)
     return reporter
 
   def _log_results(self, tests):

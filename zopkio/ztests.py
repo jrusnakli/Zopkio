@@ -97,7 +97,6 @@ class ZTestSuite(object):
     """
     return []
 
-
   def machine_logs(self, process_unique_id):
     """
     Lists the machine logs for the given process

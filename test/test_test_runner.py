@@ -18,6 +18,7 @@
 # under the License.
 
 import os
+import shutil
 import unittest
 
 from zopkio.test_runner import TestRunner
